@@ -60,5 +60,9 @@ export const NissanStd = {
       "NissanStdSeat_7_Space.geojson",
     ],
     center: [-20584.916804536762, -54335.17151238966] as [number, number],
+    coordinate: {
+      lat: 35.508893267585599,
+      lon: 139.60472214430615,
+    },
   },
 };

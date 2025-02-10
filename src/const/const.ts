@@ -18,4 +18,5 @@ export const data: Record<string, FileStructure> = {
   ...ShinyokohamaStation,
 };
 
-export const verticalOffset = 10;
+export const verticalOffset = 10; // 階の間の幅
+export const prefectureScale = 10; // 日本地図の表示のスケール

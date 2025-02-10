@@ -21,5 +21,9 @@ export const NagoyaUnimall = {
       "UniMall_B1_TWSI_Point.geojson",
     ],
     center: [-268478.06882765563, -87917.488896069] as [number, number],
+    coordinate: {
+      lat: 35.171494875999997,
+      lon: 136.88388259499999,
+    },
   },
 };

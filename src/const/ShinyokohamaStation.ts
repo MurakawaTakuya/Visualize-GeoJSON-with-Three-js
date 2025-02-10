@@ -43,5 +43,6 @@ export const ShinyokohamaStation = {
       "JrShinyokoSt_2_TWSI_Point.geojson",
     ],
     center: [-19581.029990072282, -54564.37425489624] as [number, number],
+    coordinate: { lat: 35.5081185388, lon: 139.617829259 },
   },
 };

@@ -137,5 +137,9 @@ export const NaritaAirport = {
       "Railway_NRT2_B1_TWSI_Point.geojson",
     ],
     center: [49981.70887830284, -25506.22867806066] as [number, number],
+    coordinate: {
+      lat: 35.773122623636617,
+      lon: 140.38708573103551,
+    },
   },
 };

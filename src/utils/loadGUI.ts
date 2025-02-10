@@ -9,7 +9,7 @@ import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js";
  * @param {number[]} floorList
  */
 export const loadGUI = (gui: GUI, scene: THREE.Scene, floorList: number[]) => {
-  if (window.innerWidth < 700) {
+  if (window.innerWidth < 767) {
     gui.close();
   }
 

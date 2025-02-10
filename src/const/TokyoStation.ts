@@ -352,5 +352,9 @@ export const TokyoStation = {
       "YurakuTika_B1_Space.geojson",
     ],
     center: [-6200.660977267662, -35580.36082352142] as [number, number],
+    coordinate: {
+      lat: 35.673179538590972,
+      lon: 139.75770945919132,
+    },
   },
 };

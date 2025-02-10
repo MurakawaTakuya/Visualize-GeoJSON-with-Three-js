@@ -24,6 +24,7 @@ export interface FileStructure {
   terrainFile?: string;
   geoFiles: string[];
   center?: [number, number];
+  coordinate: { lat: number; lon: number };
 }
 
 export interface MaterialWithTextures extends THREE.Material {
