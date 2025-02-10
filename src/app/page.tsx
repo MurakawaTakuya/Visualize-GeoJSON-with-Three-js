@@ -2,12 +2,12 @@
 import GeoFilesLoader from "@/components/GeoFilesLoader/GeoFilesLoader";
 import { data } from "@/const/const";
 import { Prefectures } from "@/const/Prefectures";
+import { FocusContext } from "@/context/FocusContext";
 import { calculateCenterPoint } from "@/utils/calculateCenterPoint";
 import { loadAndAddToScene2D } from "@/utils/loadAndAddToScene2D";
-import render2DGrid from "@/utils/render2DGrid";
 import renderDot from "@/utils/renderDot";
 import { resetScene } from "@/utils/resetScene";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import "./page.module.scss";
@@ -20,12 +20,14 @@ export default function Page() {
   const rootPath = selectedData && selectedData.rootPath;
   const geoFiles =
     selectedData && selectedData.geoFiles.map((f) => rootPath + f);
-  const coordinate = Object.values(data).map((location) => location.coordinate);
 
   const loader = new THREE.FileLoader().setResponseType("json");
-  const scene = new THREE.Scene();
+  const sceneRef = useRef(new THREE.Scene());
 
   const [loadFileRemaining, setLoadFileRemaining] = useState(geoFiles.length);
+
+  // focusNameをFocusContextから取得
+  const focusName = useContext(FocusContext);
 
   useEffect(() => {
     if (!selectedData) {
@@ -86,29 +88,36 @@ export default function Page() {
     controls.touches.ONE = THREE.TOUCH.PAN; // 1本指タッチでパン操作するように設定
     controls.mouseButtons.LEFT = THREE.MOUSE.PAN; // マウス左ボタンでもパン操作するように設定
 
-    scene.add(camera);
+    sceneRef.current.add(camera);
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 点を表示
-    coordinate.forEach((coord) =>
-      renderDot(scene, center, coord.lat, coord.lon)
-    );
-    renderDot(scene, center, center[1], center[0]);
+    // Object.keys(data).forEach((key) => {
+    //   const location = data[key];
+    //   const coord = location.coordinate;
+    //   renderDot(scene, center, key, coord.lat, coord.lon);
+    // });
 
     // グリッドを表示
-    render2DGrid(scene);
+    // render2DGrid(scene);
 
     // geoJSONファイルの読み込み
     geoFiles.forEach((f) => {
-      loadAndAddToScene2D(f, center, 0, loader, scene, setLoadFileRemaining);
+      loadAndAddToScene2D(
+        f,
+        center,
+        0,
+        loader,
+        sceneRef.current,
+        setLoadFileRemaining
+      );
     });
 
     // 描画
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update(); // 追加: コントロールを更新
-      renderer.render(scene, camera);
+      renderer.render(sceneRef.current, camera);
     };
     animate();
 
@@ -138,9 +147,38 @@ export default function Page() {
       controls.dispose(); // 追加: コントロールの破棄
       renderer.dispose();
       // ...existing cleanup code...
-      resetScene(scene);
+      resetScene(sceneRef.current);
     };
   }, [center]);
+
+  // 地点のドット生成
+  useEffect(() => {
+    if (!selectedData) {
+      return;
+    }
+    if (center[0] === 0 && center[1] === 0) {
+      return;
+    }
+
+    // 一旦ドットを削除
+    sceneRef.current.children
+      .filter((child) => child.userData.isDot)
+      .forEach((dot) => {
+        sceneRef.current.remove(dot);
+      });
+
+    Object.keys(data).forEach((key) => {
+      const location = data[key];
+      const coord = location.coordinate;
+      renderDot(
+        sceneRef.current,
+        center,
+        key === focusName,
+        coord.lat,
+        coord.lon
+      );
+    });
+  }, [center, focusName, sceneRef.current]);
 
   return (
     <>

@@ -18,10 +18,9 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <main>
-          {children}
+          <PlaceSelection>{children}</PlaceSelection>
           <SpeedInsights />
           <Analytics />
-          <PlaceSelection />
         </main>
       </body>
     </html>
