@@ -6,6 +6,7 @@ export const NagoyaCentralPark = {
       node: "CentralPark_B1_Node.geojson",
       link: "CentralPark_B1_Link.geojson",
     },
+    terrainFile: "central.geojson",
     geoFiles: [
       "CentralPark_B1_Build_Connect.geojson",
       "CentralPark_B1_Building.geojson",
