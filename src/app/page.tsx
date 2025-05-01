@@ -11,11 +11,13 @@ import { resetScene } from "@/utils/resetScene";
 import { useContext, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { WebGPURenderer } from "three/webgpu";
 import "./page.module.scss";
 
 export default function Page() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
+  const [renderer, setRenderer] = useState<WebGPURenderer | null>(null);
 
   const selectedData = Prefectures.Prefectures;
   const rootPath = selectedData && selectedData.rootPath;
@@ -29,6 +31,39 @@ export default function Page() {
 
   // focusNameをFocusContextから取得
   const focusName = useContext(FocusContext);
+
+  // WebGPUの対応状況を確認
+  useEffect(() => {
+    const checkWebGPU = async () => {
+      try {
+        if (!navigator.gpu) {
+          console.log(
+            "このブラウザはWebGPUに対応していません。WebGLにフォールバックします。"
+          );
+          return;
+        }
+
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter) {
+          console.log(
+            "WebGPUアダプターを取得できませんでした。WebGLにフォールバックします。"
+          );
+          return;
+        }
+
+        console.log("WebGPUが利用可能です!");
+        console.log("アダプター情報:", adapter);
+
+        const device = await adapter.requestDevice();
+        console.log("WebGPUデバイスが正常に初期化されました:", device);
+      } catch (error) {
+        console.error("WebGPU初期化エラー:", error);
+        console.log("WebGLにフォールバックします。");
+      }
+    };
+
+    checkWebGPU();
+  }, []);
 
   useEffect(() => {
     if (!selectedData) {
@@ -76,74 +111,85 @@ export default function Page() {
     camera.lookAt(0, 0, 0);
     camera.up.set(0, 1, 0);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    containerRef.current.appendChild(renderer.domElement);
+    // WebGPURendererの初期化（非同期処理）
+    (async () => {
+      const renderer = new WebGPURenderer({ alpha: true });
+      await renderer.init();
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.screenSpacePanning = true;
-    controls.enableRotate = false; // 回転操作を無効にして平面と平行な移動に制限
-    controls.enablePan = true; // パン操作を有効に（念のため明示的に設定）
-    controls.touches.ONE = THREE.TOUCH.PAN; // 1本指タッチでパン操作するように設定
-    controls.mouseButtons.LEFT = THREE.MOUSE.PAN; // マウス左ボタンでもパン操作するように設定
-
-    sceneRef.current.add(camera);
-    renderer.setSize(sizes.width, sizes.height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    // グリッドを表示
-    // render2DGrid(sceneRef.current);
-
-    // geoJSONファイルの読み込み
-    geoFiles.forEach((f) => {
-      loadAndAddToScene2D(
-        f,
-        center,
-        0,
-        loader,
-        sceneRef.current,
-        setLoadFileRemaining
+      // レンダラー情報をデバッグ表示
+      console.log("レンダラー情報:", renderer);
+      console.log(
+        "WebGPUが使用されているか:",
+        renderer instanceof WebGPURenderer ? "はい" : "いいえ"
       );
-    });
 
-    // 描画
-    const animate = () => {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(sceneRef.current, camera);
+      setRenderer(renderer);
+      containerRef.current?.appendChild(renderer.domElement);
 
-      // console.log("Position:", camera.position);
-    };
-    animate();
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.screenSpacePanning = true;
+      controls.enableRotate = false; // 回転操作を無効にして平面と平行な移動に制限
+      controls.enablePan = true; // パン操作を有効に（念のため明示的に設定）
+      controls.touches.ONE = THREE.TOUCH.PAN; // 1本指タッチでパン操作するように設定
+      controls.mouseButtons.LEFT = THREE.MOUSE.PAN; // マウス左ボタンでもパン操作するように設定
 
-    const onResize = () => {
-      if (!renderer || !containerRef.current) {
-        return;
-      }
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const aspect = width / height;
-      const left = (-viewSize * aspect) / 2;
-      const right = (viewSize * aspect) / 2;
-      const top = viewSize / 2;
-      const bottom = -viewSize / 2;
-      camera.left = left;
-      camera.right = right;
-      camera.top = top;
-      camera.bottom = bottom;
-      camera.updateProjectionMatrix();
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(width, height);
-    };
-    window.addEventListener("resize", onResize);
+      sceneRef.current.add(camera);
+      renderer.setSize(sizes.width, sizes.height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    return () => {
-      window.removeEventListener("resize", onResize);
-      controls.dispose();
-      renderer.dispose();
-      resetScene(sceneRef.current);
-    };
+      // グリッドを表示
+      // render2DGrid(sceneRef.current);
+
+      // geoJSONファイルの読み込み
+      geoFiles.forEach((f) => {
+        loadAndAddToScene2D(
+          f,
+          center,
+          0,
+          loader,
+          sceneRef.current,
+          setLoadFileRemaining
+        );
+      });
+
+      // 描画
+      const animate = () => {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(sceneRef.current, camera);
+      };
+      animate();
+
+      const onResize = () => {
+        if (!renderer || !containerRef.current) {
+          return;
+        }
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const aspect = width / height;
+        const left = (-viewSize * aspect) / 2;
+        const right = (viewSize * aspect) / 2;
+        const top = viewSize / 2;
+        const bottom = -viewSize / 2;
+        camera.left = left;
+        camera.right = right;
+        camera.top = top;
+        camera.bottom = bottom;
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(width, height);
+      };
+      window.addEventListener("resize", onResize);
+
+      return () => {
+        window.removeEventListener("resize", onResize);
+        controls.dispose();
+        renderer.dispose();
+        resetScene(sceneRef.current);
+      };
+    })();
   }, [center]);
 
   // 地点のドット生成
