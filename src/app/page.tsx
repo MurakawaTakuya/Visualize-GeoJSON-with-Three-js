@@ -17,7 +17,6 @@ import "./page.module.scss";
 export default function Page() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
-  const [renderer, setRenderer] = useState<WebGPURenderer | null>(null);
 
   const selectedData = Prefectures.Prefectures;
   const rootPath = selectedData && selectedData.rootPath;
@@ -123,7 +122,6 @@ export default function Page() {
         renderer instanceof WebGPURenderer ? "はい" : "いいえ"
       );
 
-      setRenderer(renderer);
       containerRef.current?.appendChild(renderer.domElement);
 
       const controls = new OrbitControls(camera, renderer.domElement);

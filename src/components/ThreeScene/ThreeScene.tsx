@@ -46,7 +46,6 @@ export default function ThreeScene({
 }: ThreeSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
-  const [renderer, setRenderer] = useState<WebGPURenderer | null>(null);
 
   const selectedData = data[place];
   const rootPath = selectedData && selectedData.rootPath;
@@ -154,8 +153,6 @@ export default function ThreeScene({
         "WebGPUが使用されているか:",
         renderer instanceof WebGPURenderer ? "はい" : "いいえ"
       );
-
-      setRenderer(renderer);
 
       const mapControls = new MapControls(camera, canvas);
       const zoomControls = new TrackballControls(camera, canvas);
