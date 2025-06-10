@@ -72,7 +72,7 @@ export default function PlaceSelection({ children }: PlaceSelectionProps) {
           <CarouselNext className={styles.selectionArrow} />
         </Carousel>
         {current !== 0 && count !== 0 && (
-          <p className={styles.porgress}>
+          <p className={styles.progress}>
             {current} / {count}
           </p>
         )}
