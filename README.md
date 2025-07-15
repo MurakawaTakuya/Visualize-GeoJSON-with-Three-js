@@ -1,8 +1,25 @@
 # Visualize GeoJSON with Three.js
 This app visualizes GeoJSON data with Three.js. GeoJSON data is generated with [convert-shp-to-geojson](https://github.com/MurakawaTakuya/convert-shp-to-geojson) using shp files.
+
+## Features
+- 3D visualization of indoor maps from open data
+- Real aerial imagery backgrounds with precise coordinate alignment
+- Interactive controls for floors and terrain visualization
+- WebGPU support for enhanced performance
+
 ## Tech Stack
 - Next.js
 - Three.js
+
+## Aerial Imagery Configuration
+The app supports real aerial imagery backgrounds for locations with terrain data. To use high-quality Google Maps satellite imagery:
+
+1. Copy `.env.example` to `.env.local`
+2. Add your Google Maps API key:
+   ```
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+   ```
+3. If no API key is provided, the app will use OpenStreetMap satellite tiles as a fallback
 
 ## Data Source
 3Dデータ: [国土交通省 G空間情報センター](https://www.geospatial.jp/ckan/organization/seisakutokatsu)
