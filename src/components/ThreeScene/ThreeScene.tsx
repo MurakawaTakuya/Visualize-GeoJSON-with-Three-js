@@ -6,7 +6,7 @@ import { getFloorNumber } from "@/utils/getFloorNumber";
 import { loadAndAddToScene } from "@/utils/loadAndAddToScene";
 import { loadGUI } from "@/utils/loadGUI";
 import { loadNetworkFile } from "@/utils/loadNetworkFile";
-import { loadTerrainFile } from "@/utils/loadTerrainFile";
+import { loadAerialImagery } from "@/utils/loadAerialImagery";
 import { resetScene } from "@/utils/resetScene";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -224,15 +224,17 @@ export default function ThreeScene({
         );
       }
 
-      // 地表データの読み込み
+      // 地表データの読み込み（航空写真）
       if (terrainFile) {
-        loadTerrainFile(
+        loadAerialImagery(
           loader,
           terrainFile,
           center,
           scene,
           gui,
-          setLoadFileRemaining
+          setLoadFileRemaining,
+          selectedData.coordinate.lat,
+          selectedData.coordinate.lon
         );
       }
 
